@@ -125,11 +125,7 @@ class CtrlBridge(object):
                 finalpos = ju.jntvalue('ready')
                 self.trajectory = ju.generate_trajectory(self.curr_jntinfo.position,finalpos)
                 self.statusflag[0] = 1
-            if key.char == 'y':
-                print("y : cheese")
-                finalpos = ju.jntvalue('cheese')
-                self.trajectory = ju.generate_trajectory(self.curr_jntinfo.position,finalpos)
-                self.statusflag[0] = 1                
+             
                 # self.libcmdpub.publish('ready')
 
             # if key.char == 'a':
@@ -166,8 +162,6 @@ class CtrlBridge(object):
             if key.char == 'w':
                 print(" move joint to open position")
 
-                # # self.single_record_flag = 0
-                # # # self.jtp_msg.positions = [0.0,	0.5,	-1.57,	0.0,	0.0,	-0.5,	1.57,	0.0]
                 finalpos = ju.jntvalue('ready_w')
 
                 self.trajectory = ju.generate_trajectory(self.curr_jntinfo.position,finalpos)
@@ -190,20 +184,29 @@ class CtrlBridge(object):
                 poslst.append(ju.jntvalue('fng_mid1'))
                 poslst.append(ju.jntvalue('fng_mid2'))
                 poslst.append(ju.jntvalue('fng_final'))
-                print(poslst)
+                # print(poslst)
                 self.trajectory = ju.gen_traj_multiple(poslst)
                 self.statusflag[0] = 1
 
             if key.char == 't':
-                print("debug position")
-                # self.single_record_flag = 1
-                # debugpos = [0.0,	0.55,	-1.1,	0.0,	0.0,	-0.55,	1.1,	0.0]
-                # # debugpos = [0.0,	0.8,	-1.1,	0.0,	0.0,	-0.8,	1.1,	0.0]
-                # self.trajectory = ju.generate_trajectory(self.curr_jntinfo.position,debugpos )
+                print(" move joint to fng tap ready position")
+                poslst = []
+                poslst.append(list(self.curr_jntinfo.position))
+                poslst.append(ju.jntvalue('tap_ready1'))
+                poslst.append(ju.jntvalue('tap_ready2'))
+                self.trajectory = ju.gen_traj_multiple(poslst)
+                self.statusflag[0] = 1
+            if key.char == 'y':
+                print("move joint to scratch after tapping")
+                poslst = []
 
-                # self.statusflag[0] = 1
-
-          
+                poslst.append(list(self.curr_jntinfo.position))
+                poslst.append(ju.jntvalue('tap_scratch0'))
+                poslst.append(ju.jntvalue('tap_scratch1'))
+                poslst.append(ju.jntvalue('tap_scratch2'))
+                poslst.append(ju.jntvalue('tap_scratch3'))
+                self.trajectory = ju.gen_traj_multiple(poslst)
+                self.statusflag[0] = 1                
 
             if key.char == '/':
                 print("help")
