@@ -6,7 +6,3 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
 from utils import jntutil as ju
 
-
-
-
-

@@ -107,6 +107,60 @@ class CtrlBridge(object):
             self.jtstate_msg.position = []
             # remove the first element in the trajectory until the trajectory is empty
             self.trajectory.pop(0)
+        # #################################### run the pipeline
+        # self.currflag, self.statusflag, self.string_fr, self.string_jtval, self.curr_state = self.Pl.run(self.statusflag, 
+        #                                                                                 self.string_fr, 
+        #                                                                                 self.string_jtval,
+        #                                                                                 self.curr_state)
+        # if self.statusflag[1] == 1:
+        #     #publish msg to franka arm
+        #     self.pub2_fr.publish(self.string_fr)
+        #     self.statusflag[1] = 0
+        # if self.statusflag[2] == 1:
+        #     #publish msg to allegro hand
+        #     print(self.string_jtval)
+        #     self.jtp_msg.positions = ju.jntvalue(self.string_jtval)
+        #     self.jtp_msg.time_from_start = rospy.Duration(self.trajduration)
+        #     self.jt_msg.points.append(self.jtp_msg)
+        #     print(self.jtp_msg.positions)
+        #     self.jtpub.publish(self.jt_msg)
+        #     self.jt_msg.points = []
+        #     # self.jtpub.publish(self.string_jtval)
+
+        #     self.statusflag[2] = 0
+        # if self.statusflag[3] == 1:
+        #     #publish msg to trajectory generator
+
+        #     self.trajectory = cu.generate_trajectory(self.curr_jntinfo.position, cu.jntvalue(self.string_jtval))
+        #     self.statusflag[0] = 1
+        #     self.statusflag[3] = 0
+
+        # # reseting the statusflag[5] by comparing current joint position and the target joint position
+        # # if the current joint position is close to the target joint position, then reset the flag
+        # if self.statusflag[4] == 1 and self.statusflag[0] !=2:
+        #     if np.linalg.norm(np.asarray(self.curr_jntinfo.position) - np.asarray(cu.jntvalue(self.string_jtval))) < 0.2:
+        #         self.statusflag[5] = cu.gripidx(self.string_jtval)
+        #     else:
+        #         if self.curr_state != 'start_controller':
+        #             print('it\'s resetting')
+        #             print('it\'s resetting')
+        #             print('it\'s resetting')
+        #             print('it\'s resetting')    
+        #             print('it\'s resetting')
+        #             print('it\'s resetting')
+        #             self.statusflag[5] = 0
+
+        # if self.curr_state == 'grab_determine':
+        #     # determine whether there is the object inside of the gripper or not, and update the statusflag[8]
+        #     # if there is the object, then statusflag[8] = 1
+        #     # if there is no object, then statusflag[8] = 2 (redo the motion from the capturing status)
+        #     if self.extracted_flag == 1:
+        #         self.statusflag[8] = 1
+        #     else:
+        #         self.statusflag[8] = 2
+
+
+
 
     def on_press(self, key):
         
@@ -207,6 +261,18 @@ class CtrlBridge(object):
                 poslst.append(ju.jntvalue('tap_scratch3'))
                 self.trajectory = ju.gen_traj_multiple(poslst)
                 self.statusflag[0] = 1                
+            if key.char == 'u':
+                print("move joint to finger-grasping motion ready")
+                finalpos = ju.jntvalue('finger_grasp_ready')
+
+                self.trajectory = ju.generate_trajectory(self.curr_jntinfo.position,finalpos)
+                self.statusflag[0] = 1
+            if key.char == 'i':
+                print("move joint to finger-grasping motion")
+                finalpos = ju.jntvalue('finger_grasp_done')
+
+                self.trajectory = ju.generate_trajectory(self.curr_jntinfo.position,finalpos)
+                self.statusflag[0] = 1
 
             if key.char == '/':
                 print("help")
