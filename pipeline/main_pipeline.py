@@ -49,7 +49,18 @@ class CtrlBridge(object):
         self.jtstatepub = rospy.Publisher('allegroHand/joint_cmd', JointState, queue_size=10)
         
         self.libcmdpub = rospy.Publisher('allegroHand/lib_cmd', String, queue_size=10)
+        self.libcamerapub = rospy.Publisher('camera/blob_detect', String, queue_size=10)
             # <!-- <remap from="allegroHand/lib_cmd" to="allegroHand_$(arg NUM)/lib_cmd"/> -->
+
+
+        ############### for communication btw manip and franka arm
+
+
+        self.pub2_fr =  rospy.Publisher('/cmd_manip2frarm', String, queue_size=10)
+        self.frsub = rospy.Subscriber('/cmd_frarm2manip', String, self.callback_frsub)
+        self.blobsub = rospy.Subscriber('/cmd_camerablob2manip', String, self.callback_blobsub)
+
+
 
         ### another keyboard listener 
         listener = keyboard.Listener(on_press=self.on_press,
@@ -76,6 +87,66 @@ class CtrlBridge(object):
 
         # list length with zero: 9
         self.statusflag = [0]*9 
+
+        ###############
+        ### self.statusflag[0] = self.startpub_flag
+        # startpub_flag: flag for start publishing the trajectory in jointmsg format (same as command from keyboard)
+        # 0: not started 
+        # 1: execute trajectory from keyboard command 
+        ### self.statusflag[1] = self.pub_fr_flag
+        # pub_fr_flag: flag for publishing the command to franka arm
+        # 0: not started
+        # 1: publish the command to franka arm once
+        ### self.statusflag[2] = self.grasp_flag
+        # whether the grasp strategy is in progress or not
+        # grasp_flag: flag for grasping strategy
+        # 0: not started
+        # 1: grasping with fingernail / 2: grasping with tapping motion / 3: grasping with fingers
+        ### self.statusflag[3] = self.pub_traj_flag
+        # pub_traj_flag: flag for publishing the trajectory (for trajectory generation here)
+        # 0: not started
+        # 1: change the trajectory and run the trajectory once
+        ### self.statusflag[4] = self.enable_pipeline_flag
+        # enable_pipeline_flag: flag for enabling the pipeline in cu.run_pipeline ftn
+        # 0: not started
+        # 1: enable the pipeline
+        ### self.statusflag[5] = self.allegrohand_run_flag
+        # allegrohand_run_flag: flag for running the allegrohand
+        # 0: allegrohand not running
+        # 1: allegrohand running
+        ### self.statusflag[6] = self.fr_run_flag
+        # fr_run_flag: flag for running the franka arm
+        # 0: franka arm not running
+        # 1: franka arm running
+        ### self.statusflag[7] = self.done_flag
+        # done_flag: flag for finishing the execution of each status
+        # 0: not finished
+        # 1: finished
+        ### self.statusflag[8] = self.debug_flag
+        # debug_flag: flag for debugging - determines whether go to the next state or not
+        # 0: don't go next state
+        # 1: go to the next state (got it from 'a' key)
+        ### self.statusflag[8] = self.indicator_flag
+        # indicator_flag: governs communication status for each state.
+        # a. during 'detect_and_grab', works as a flag for showing whether the detection is done or not 
+        #   0: not done
+        #   1: done
+        # b. during 'detect_and_grab' and 'grasp' status in franka robot, indicates franka arm movement status  
+        #   0: not done
+        #   1: done
+        # c. during 'grab_screw', indicates whether the screw is grabbed or not
+        #   0: not grabbed
+        #   1: grabbed
+
+
+        ##### self.current_state 
+        self.string_fr = 'initial'
+        ##### make string_jtval as a list to handle multiple joint values
+        self.string_jtval = ['home']
+        self.curr_state = 'waiting_for_input'
+
+        self.Pl = pu.PipelineState(self.statusflag, self.string_fr, self.string_jtval, self.curr_state)
+        self.currflag = self.Pl.get_statusflag()
 
 
 
@@ -108,69 +179,81 @@ class CtrlBridge(object):
             # remove the first element in the trajectory until the trajectory is empty
             self.trajectory.pop(0)
         # #################################### run the pipeline
-        # self.currflag, self.statusflag, self.string_fr, self.string_jtval, self.curr_state = self.Pl.run(self.statusflag, 
-        #                                                                                 self.string_fr, 
-        #                                                                                 self.string_jtval,
-        #                                                                                 self.curr_state)
-        # if self.statusflag[1] == 1:
-        #     #publish msg to franka arm
-        #     self.pub2_fr.publish(self.string_fr)
-        #     self.statusflag[1] = 0
-        # if self.statusflag[2] == 1:
-        #     #publish msg to allegro hand
-        #     print(self.string_jtval)
-        #     self.jtp_msg.positions = ju.jntvalue(self.string_jtval)
-        #     self.jtp_msg.time_from_start = rospy.Duration(self.trajduration)
-        #     self.jt_msg.points.append(self.jtp_msg)
-        #     print(self.jtp_msg.positions)
-        #     self.jtpub.publish(self.jt_msg)
-        #     self.jt_msg.points = []
-        #     # self.jtpub.publish(self.string_jtval)
+        self.currflag, self.statusflag, self.string_fr, self.string_jtval, self.curr_state = self.Pl.run(self.statusflag, 
+                                                                                        self.string_fr, 
+                                                                                        self.string_jtval,
+                                                                                        self.curr_state)
+        if self.statusflag[1] == 1:
+            #publish msg to franka arm
+            self.pub2_fr.publish(self.string_fr)
+            self.statusflag[1] = 0
 
-        #     self.statusflag[2] = 0
-        # if self.statusflag[3] == 1:
-        #     #publish msg to trajectory generator
+        if self.statusflag[3] == 1:
+            #publish msg to trajectory generator
 
-        #     self.trajectory = cu.generate_trajectory(self.curr_jntinfo.position, cu.jntvalue(self.string_jtval))
-        #     self.statusflag[0] = 1
-        #     self.statusflag[3] = 0
+            # self.trajectory = ju.generate_trajectory(self.curr_jntinfo.position, cu.jntvalue(self.string_jtval))
+            poslst = []
+            poslst.append(list(self.curr_jntinfo.position))
+            for i in range(len(self.string_jtval)):
+                poslst.append(ju.jntvalue(self.string_jtval[i]))
+            self.trajectory = ju.gen_traj_multiple(poslst)
+            self.statusflag[0] = 1
+            self.statusflag[3] = 0
 
-        # # reseting the statusflag[5] by comparing current joint position and the target joint position
-        # # if the current joint position is close to the target joint position, then reset the flag
-        # if self.statusflag[4] == 1 and self.statusflag[0] !=2:
-        #     if np.linalg.norm(np.asarray(self.curr_jntinfo.position) - np.asarray(cu.jntvalue(self.string_jtval))) < 0.2:
-        #         self.statusflag[5] = cu.gripidx(self.string_jtval)
-        #     else:
-        #         if self.curr_state != 'start_controller':
-        #             print('it\'s resetting')
-        #             print('it\'s resetting')
-        #             print('it\'s resetting')
-        #             print('it\'s resetting')    
-        #             print('it\'s resetting')
-        #             print('it\'s resetting')
-        #             self.statusflag[5] = 0
+        # reseting the statusflag[5] by comparing current joint position and the target joint position
+        # if the current joint position is close to the target joint position, then reset the flag
+        if self.statusflag[4] == 1:
+            curr_diff = np.linalg.norm(np.asarray(self.curr_jntinfo.position) - np.asarray(ju.jntvalue(self.string_jtval[-1])))
+            # print('it\'s resetting, current jtval: ' , self.string_jtval[-1], ', curr_diff: ', curr_diff)
+            if curr_diff < 1.8:
+                self.statusflag[5] = ju.allegro_idx(self.string_jtval[-1])
+            else:
+                if self.curr_state != 'start_controller':
+                    print('it\'s resetting, current jtval: ' , self.string_jtval[-1], ', curr_diff: ', curr_diff)
+                    print('it\'s resetting, current jtval: ' , self.string_jtval[-1])
+                    self.statusflag[5] = 0
 
-        # if self.curr_state == 'grab_determine':
-        #     # determine whether there is the object inside of the gripper or not, and update the statusflag[8]
-        #     # if there is the object, then statusflag[8] = 1
-        #     # if there is no object, then statusflag[8] = 2 (redo the motion from the capturing status)
-        #     if self.extracted_flag == 1:
-        #         self.statusflag[8] = 1
-        #     else:
-        #         self.statusflag[8] = 2
+        if self.curr_state == 'tap_check':
+            # determine whether there is the object inside of the allegrohand or not, and update the statusflag[8]
+            # if there is the object, then statusflag[8] = 1
+            # if there is no object, then statusflag[8] = 2 (redo the motion from the capturing status)
+            if self.statusflag[8] == 2:
+                self.libcamerapub.publish('detect')
+                self.statusflag[8] = 0
 
 
 
+    def callback_blobsub(self, data):
+        """
+        determine whether there is object or not
+        """
+        frstatus = data.data
+        # frstatus = frstatus.split("/")
 
+        self.statusflag[8] = int(frstatus)
+
+
+    def callback_frsub(self, data):
+        frstatus = data.data
+        frstatus = frstatus.split("/")
+
+        self.statusflag[6] = int(ju.fridx(frstatus[0]))
+        # self.statusflag[8] = int(frstatus[1])
     def on_press(self, key):
         
         try:
             if key.char == 'h':
                 print("h :  existing command - home pose ")
-                finalpos = ju.jntvalue('home')
-                self.trajectory = ju.generate_trajectory(self.curr_jntinfo.position,finalpos)
+
+                poslst = []
+                poslst.append(list(self.curr_jntinfo.position))
+                stexample = ['home', 'ready']
+                for i in range(len(stexample)):
+                    poslst.append(ju.jntvalue(stexample[i]))
+                poslst.append(ju.jntvalue('home'))
+                self.trajectory = ju.gen_traj_multiple(poslst)
                 self.statusflag[0] = 1
-                
+
             if key.char == 'o':
                 print("o :  existing command - Servos Off ")
                 self.libcmdpub.publish('off')
@@ -182,36 +265,37 @@ class CtrlBridge(object):
              
                 # self.libcmdpub.publish('ready')
 
-            # if key.char == 'a':
-            #     print("start next process if each step is done")
-            #     if self.statusflag[7] == 0:
-            #         self.statusflag[7] = 1 
-            #     else:
-            #         self.statusflag[7] = 0
+            if key.char == 'a':
+                print("start next process if each step is done")
+                if self.statusflag[7] == 0:
+                    self.statusflag[7] = 1 
+                else:
+                    self.statusflag[7] = 0
 
 
-            # if key.char == 's':
-            #     print("start /end initial state regardless of the current state")
-            #     self.statusflag[4] = 0 if self.statusflag[4] == 1 else 1
+            if key.char == 's':
+                print("reset statusflag and go to the initial state")
+                self.statusflag[4] = 0 if self.statusflag[4] == 1 else 1
+                self.statusflag[2] = 0
+            if key.char == 'd':
+                print("start /end fingernail-grasping state regardless of the current state")        
+                self.statusflag[2] = 0 if self.statusflag[2] == 1 else 1
+                print(self.statusflag)
+            if key.char == 'f':
+                print("start /end tapping state regardless of the current state")
+                self.statusflag[2] = 0 if self.statusflag[2] == 2 else 2
+                print(self.statusflag)
 
-            #     result_dir = 'screw_recognition/results/sorting_result'
-            #     print("Saving the labels detected so far...")
+            if key.char == 'g':
+                print("start /end general-grasping state regardless of the current state")
+                self.statusflag[2] = 0 if self.statusflag[2] == 3 else 3
+                print(self.statusflag)
 
-            #     file_paths = {
-            #         'pred_labels': os.path.join(result_dir, 'pred_labels.txt'),
-            #         'pred_labels_one': os.path.join(result_dir, 'pred_labels_one.txt'),
-            #         'cur_lst': os.path.join(result_dir, 'current_joint_value.txt'),
-            #         'des_lst': os.path.join(result_dir, 'desired_joint_value.txt'),
-            #         'cur_xyzlst': os.path.join(result_dir, 'current_ee_value.txt'),
-            #         'des_xyzlst': os.path.join(result_dir, 'desired_ee_value.txt')
-            #     }
+            if key.char == 'j':
+                print("start /end general-grasping state regardless of the current state")
+                self.statusflag[8] = 0 if self.statusflag[8] == 3 else 3
+                print(self.statusflag)
 
-            #     for name, path in file_paths.items():
-            #         pu.save_list_to_file(path, getattr(self, name))
-
-
-            # if key.char == 'd':
-            #     self.classify_flag = 1
 
             if key.char == 'w':
                 print(" move joint to open position")
@@ -261,6 +345,8 @@ class CtrlBridge(object):
                 poslst.append(ju.jntvalue('tap_scratch3'))
                 self.trajectory = ju.gen_traj_multiple(poslst)
                 self.statusflag[0] = 1                
+
+
             if key.char == 'u':
                 print("move joint to finger-grasping motion ready")
                 finalpos = ju.jntvalue('finger_grasp_ready')
@@ -284,9 +370,10 @@ class CtrlBridge(object):
                 print("  Ready Pose:\t\t\t'R'")
                 print("  Motors Off (free motion):\t'O'")
                 print("  Go to next state:\t\t'A'")
-                print("  move to initial state of tapping:\t'S'")
+                print("  Reset all the state and go to the initial state:\t'S'")
                 print("  move to initial state of fingernail-grasping:\t'D'")
-                print("  move to initial state of general-grasping:\t'F'")
+                print("  move to initial state of tapping:\t'F'")
+                print("  move to initial state of general-grasping:\t'G'")
                 print("  Debugging - ready pose:\t'W'")
                 print("  Help (this message):\t\t'/'")
                 print(" -----------------------------------------------------------------------------")
