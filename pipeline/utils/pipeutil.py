@@ -247,37 +247,39 @@ class PipelineState:
 
 
         # if the status is grasp / ready_w and it successfully move the robot base on the depthpt input, then change the state
-        if self.statusflag[8] !=2 and self.statusflag[2] == 2 and self.run_once == 1 :
+        if self.statusflag[8] !=2 and self.statusflag[2] == 2 and self.run_once < 3 :
             #reset graspflag
             print("ready to move to the next state!!!!!", self.statusflag, self.current_state)
             #### maybe using self.statusflag[8]??
-            if self.statusflag[8] == 3:
+            if self.statusflag[8] == 3 and self.run_once == 1:
                 print("object detected, move the seed", self.statusflag, self.current_state)
                 print("move to the next state", self.statusflag)
                 self.statusflag[1] = 1
                 self.string_fr = 'tap_verify_ready'
+                self.run_once += 1
+
+            if self.statusflag[7] == 1 and self.statusflag[8] == 3 and self.run_once == 2:
+
+                self.run_once = 0
+                current_state = 'tap_done'
+                self.statusflag[2] = 0
+                self.statusflag[7] = 0
+                self.statusflag[8] = 0
 
 
-                if self.statusflag[7] == 1:
-
-                    self.run_once = 0
-                    current_state = 'tap_done'
-                    self.statusflag[2] = 0
-                    self.statusflag[7] = 0
-
-
-            if self.statusflag[8] == 4:
+            if self.statusflag[8] == 4 and self.run_once == 1:
                 print("object not detected, repeat the state", self.statusflag, self.current_state)
                 self.statusflag[1] = 1
                 self.string_fr = 'tap_verify_ready'
+                self.run_once += 1
 
+            if self.statusflag[7] == 1 and self.statusflag[8] == 3 and self.run_once == 2:
 
-                if self.statusflag[7] == 1:
-
-                    self.run_once = 0
-                    current_state = 'tap_graspready'
-
-                    self.statusflag[7] = 0
+                self.run_once = 0
+                current_state = 'tap_graspready'
+                self.statusflag[2] = 0
+                self.statusflag[7] = 0
+                self.statusflag[8] = 0
 
 
         return current_state
