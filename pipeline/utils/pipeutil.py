@@ -120,8 +120,8 @@ class PipelineState:
             self.statusflag[3] = 1
             self.statusflag[1] = 1
 
-            self.string_jtval = ['fng_ready', 'fng_mid1', 'fng_mid2', 'fng_final']
-            self.string_fr = 'nailgrasp_done/1'
+            self.string_jtval = ['fng_ready', 'fng_mid1', 'fng_mid2', 'fng_final', 'fng_final2']
+            self.string_fr = 'nailgrasp_done/2'
 
             self.run_once += 1
             print('nail_grasp state - first move!!')
@@ -129,7 +129,7 @@ class PipelineState:
 
         print("current status: ",    self.statusflag, self.current_state)
 
-        if self.statusflag[2] == 1 and self.statusflag[5] == ju.allegro_idx('fng_final') and self.run_once == 1:            
+        if self.statusflag[2] == 1 and self.statusflag[5] == ju.allegro_idx('fng_final2') and self.run_once == 1:            
             
             print("ready to move to the next state!!!!!", self.statusflag, self.current_state)
 
