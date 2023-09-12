@@ -243,41 +243,42 @@ class PipelineState:
                 self.string_fr = 'tap_verify_tap'
                 self.run_once += 1  
                 # make selfstatusflag[8] as 2, so that we can publish the camera detection request
-                self.statusflag[8] = 2
+
+        if self.statusflag[6] == ju.fridx('tap_verify_tap') and self.run_once == 1:
+            self.statusflag[8] = 2
+            self.run_once += 1
 
 
         # if the status is grasp / ready_w and it successfully move the robot base on the depthpt input, then change the state
-        if self.statusflag[8] !=2 and self.statusflag[2] == 2 and self.run_once < 3 :
+        if self.statusflag[8] !=2 and self.statusflag[2] == 2 and self.run_once < 4 :
             #reset graspflag
             print("ready to move to the next state!!!!!", self.statusflag, self.current_state)
             #### maybe using self.statusflag[8]??
-            if self.statusflag[8] == 3 and self.run_once == 1:
+            if self.statusflag[8] == 3 and self.run_once == 2:
                 print("object detected, move the seed", self.statusflag, self.current_state)
                 print("move to the next state", self.statusflag)
                 self.statusflag[1] = 1
                 self.string_fr = 'tap_verify_ready'
                 self.run_once += 1
 
-            if self.statusflag[7] == 1 and self.statusflag[8] == 3 and self.run_once == 2:
+            if self.statusflag[7] == 1 and self.statusflag[8] == 3 and self.run_once == 3:
 
                 self.run_once = 0
                 current_state = 'tap_done'
-                self.statusflag[2] = 0
                 self.statusflag[7] = 0
                 self.statusflag[8] = 0
 
 
-            if self.statusflag[8] == 4 and self.run_once == 1:
+            if self.statusflag[8] == 4 and self.run_once == 2:
                 print("object not detected, repeat the state", self.statusflag, self.current_state)
                 self.statusflag[1] = 1
                 self.string_fr = 'tap_verify_ready'
                 self.run_once += 1
 
-            if self.statusflag[7] == 1 and self.statusflag[8] == 3 and self.run_once == 2:
+            if self.statusflag[7] == 1 and self.statusflag[8] == 4 and self.run_once == 3:
 
                 self.run_once = 0
                 current_state = 'tap_graspready'
-                self.statusflag[2] = 0
                 self.statusflag[7] = 0
                 self.statusflag[8] = 0
 
@@ -290,13 +291,15 @@ class PipelineState:
         print('tap_done state', self.statusflag, self.current_state)
         current_state = 'tap_done'
         if self.run_once < 1:
-            self.string_jtval = ['tap_scratch0', 'tap_scratch1', 'tap_scratch2', 'tap_scratch3']
+            self.string_jtval = ['tap_scratch0', 'tap_scratch1', 'tap_scratch2', 'tap_scratch3', 'tap_scratch4',
+                                 'tap_scratch2', 'tap_scratch1', 'tap_scratch0', 'tap_scratch1',
+                                 'tap_scratch2', 'tap_scratch3', 'tap_scratch4']
             self.run_once += 1
             self.statusflag[3] = 1
 
 
         # if the status is grasp / ready_w and it successfully move the robot base on the depthpt input, then change the state
-        if self.statusflag[2] == 2 and self.statusflag[6] == ju.fridx('tap_verify_ready') and self.statusflag[5] == ju.allegro_idx('tap_scratch3') and self.run_once == 1:  
+        if self.statusflag[2] == 2 and self.statusflag[6] == ju.fridx('tap_verify_ready') and self.statusflag[5] == ju.allegro_idx('tap_scratch4') and self.run_once == 1:  
             print("ready to move to the next state!!!!!", self.statusflag, self.current_state)
  
             if self.statusflag[7] == 1:

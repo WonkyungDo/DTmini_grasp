@@ -218,7 +218,7 @@ class CtrlBridge(object):
             # if there is the object, then statusflag[8] = 1
             # if there is no object, then statusflag[8] = 2 (redo the motion from the capturing status)
             if self.statusflag[8] == 2:
-                self.libcamerapub.publish('detect')
+                self.libcamerapub.publish("d")
                 self.statusflag[8] = 0
 
 
@@ -343,6 +343,7 @@ class CtrlBridge(object):
                 poslst.append(ju.jntvalue('tap_scratch1'))
                 poslst.append(ju.jntvalue('tap_scratch2'))
                 poslst.append(ju.jntvalue('tap_scratch3'))
+                poslst.append(ju.jntvalue('tap_scratch4'))
                 self.trajectory = ju.gen_traj_multiple(poslst)
                 self.statusflag[0] = 1                
 
