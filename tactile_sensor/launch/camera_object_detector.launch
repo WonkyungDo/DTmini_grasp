@@ -1,0 +1,11 @@
+<launch>
+    <!-- Start the camera streamer node -->
+    <node name="cam_streamer" pkg="cam_streamer" type="cam_stream.py" output="screen">
+        <!-- Add any required parameters here -->
+    </node>
+
+    <!-- Start the blob detector node -->
+    <node name="object_detector" pkg="cam_streamer" type="object_detector.py" output="screen">
+        <!-- Add any required parameters here -->
+    </node>
+</launch>
