@@ -1,0 +1,37 @@
+"Source:","/Users/ankushdhawan/Documents/Stanford/Research/KiCad/flexible_led_arr/flexible_led_arr.kicad_sch"
+"Date:","Friday, February 10, 2023 at 06:17:44 PM"
+"Tool:","Eeschema (6.0.7-1)-1"
+"Generator:","/Applications/KiCad/KiCad.app/Contents/SharedSupport/plugins/bom_csv_grouped_by_value.py"
+"Component Count:","13"
+
+"Individual Components:"
+
+"Item","Qty","Reference(s)","Value","LibPart","Footprint","Datasheet","Note","Part Number"
+"","","C1","C","Device:C","Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder","~","",""
+"","","D1","LED Green","Device:LED","LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder","https://www.qt-brightek.com/datasheet/QBLP631_series.pdf","","QBLP631-IG"
+"","","D2","LED Red","Device:LED","LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder","https://www.qt-brightek.com/datasheet/QBLP631_series.pdf",""," QBLP631-IG"
+"","","D3","LED Blue","Device:LED","LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder","https://www.qt-brightek.com/datasheet/QBLP631_series.pdf","","QBLP631-IB"
+"","","H1","MotorHole","Mechanical:MountingHole_Pad","Holes:MountingHole_M1.6","~","Screw: M1.6x10 (countersunk), or M1.6x9 (pan/round)",""
+"","","H2","MotorHole","Mechanical:MountingHole_Pad","Holes:MountingHole_M1.6","~","Screw: M1.6x10 (countersunk), or M1.6x9 (pan/round)",""
+"","","H3","MotorHole","Mechanical:MountingHole_Pad","Holes:MountingHole_M1.6","~","Screw: M1.6x10 (countersunk), or M1.6x9 (pan/round)",""
+"","","H4","MotorHole","Mechanical:MountingHole_Pad","Holes:MountingHole_M1.6","~","Screw: M1.6x10 (countersunk), or M1.6x9 (pan/round)",""
+"","","R1","R_US","Device:R_US","Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder","~","",""
+"","","R2","0Ω","Device:R_US","Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder","https://www.seielect.com/Catalog/SEI-RMCF_RMCP.pdf","","RMCF0402ZT0R00"
+"","","R3","0Ω","Device:R_US","Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder","https://www.seielect.com/Catalog/SEI-RMCF_RMCP.pdf","","RMCF0402ZT0R00"
+"","","TP1","5V","Connector:TestPoint","TestPoint:TestPoint_Pad_1.0x1.0mm","~","",""
+"","","TP2","GND","Connector:TestPoint","TestPoint:TestPoint_Pad_1.0x1.0mm","~","",""
+
+
+
+"Collated Components:"
+
+"Item","Qty","Reference(s)","Value","LibPart","Footprint","Datasheet","Note","Part Number"
+"1","1","C1","C","Device:C","Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder","~","",""
+"2","1","D1","LED Green","Device:LED","LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder","https://www.qt-brightek.com/datasheet/QBLP631_series.pdf","","QBLP631-IG"
+"3","1","D2","LED Red","Device:LED","LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder","https://www.qt-brightek.com/datasheet/QBLP631_series.pdf",""," QBLP631-IG"
+"4","1","D3","LED Blue","Device:LED","LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder","https://www.qt-brightek.com/datasheet/QBLP631_series.pdf","","QBLP631-IB"
+"5","4","H1, H2, H3, H4","MotorHole","Mechanical:MountingHole_Pad","Holes:MountingHole_M1.6","~","Screw: M1.6x10 (countersunk), or M1.6x9 (pan/round)",""
+"6","1","R1","R_US","Device:R_US","Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder","~","",""
+"7","2","R2, R3","0Ω","Device:R_US","Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder","https://www.seielect.com/Catalog/SEI-RMCF_RMCP.pdf","","RMCF0402ZT0R00"
+"8","1","TP1","5V","Connector:TestPoint","TestPoint:TestPoint_Pad_1.0x1.0mm","~","",""
+"9","1","TP2","GND","Connector:TestPoint","TestPoint:TestPoint_Pad_1.0x1.0mm","~","",""
